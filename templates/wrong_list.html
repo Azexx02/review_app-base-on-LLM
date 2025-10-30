@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>错题本 - LLM复习题系统</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .container { width: 1000px; margin: 30px auto; }
+        .wrong-item { padding: 20px; margin-bottom: 15px; border: 1px solid #fd7e14; border-radius: 4px; background: #fff3cd; }
+        .wrong-count { color: #d9534f; font-weight: bold; }
+        .export-btn { display: inline-block; padding: 10px 20px; background: #17a2b8; color: white; text-decoration: none; border-radius: 4px; margin-bottom: 20px; }
+        .export-btn:hover { background: #138496; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>LLM智能复习题系统</h1>
+        <nav>
+            <a href="{{ url_for('index') }}">首页</a>
+            <a href="{{ url_for('upload_material') }}">上传资料生成题目</a>
+            <a href="{{ url_for('question_list') }}">题库</a>
+            <a href="{{ url_for('create_paper') }}">生成卷子</a>
+            <a href="{{ url_for('wrong_list') }}">错题本</a>
+            <span>欢迎，{{ current_user.username }}</span>
+            <a href="{{ url_for('logout') }}">退出登录</a>
+        </nav>
+    </header>
+
+    <div class="container">
+        <h2>我的错题本</h2>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, msg in messages %}
+                    <div class="flash {{ category }}">{{ msg }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- 导出PDF按钮 -->
+        <a href="{{ url_for('export_wrong') }}" class="export-btn">导出错题本为PDF</a>
+
+        <!-- 错题列表 -->
+        {% if wrong_with_questions %}
+            {% for wq, question in wrong_with_questions %}
+                <div class="wrong-item">
+                    <div>
+                        <strong>错误次数：</strong><span class="wrong-count">{{ wq.error_count }}次</span>
+                        <strong>最近错误时间：</strong>{{ wq.last_wrong_time.strftime('%Y-%m-%d %H:%M') }}
+                    </div>
+                    
+                    <div style="margin-top: 10px;">
+                        {% if question.question_type == 'single_choice' %}
+                            <span class="question-type">单选题</span>
+                        {% elif question.question_type == 'multiple_choice' %}
+                            <span class="question-type">多选题</span>
+                        {% else %}
+                            <span class="question-type">填空题</span>
+                        {% endif %}
+                        <strong>题干：</strong>{{ question.content }}
+                    </div>
+                    
+                    {% if question.options %}
+                        <div style="margin: 10px 0 0 30px;">
+                            <strong>选项：</strong><br>
+                            {{ question.options|safe }}
+                        </div>
+                    {% endif %}
+                    
+                    <div style="margin-top: 10px;">
+                        <strong>正确答案：</strong><span style="color: #28a745;">{{ question.correct_answer }}</span>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div style="text-align: center; padding: 50px; color: #666;">
+                暂无错题，继续加油！
+            </div>
+        {% endif %}
+    </div>
+</body>
+</html>

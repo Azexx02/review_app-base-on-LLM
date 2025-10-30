@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>题库 - LLM复习题系统</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .container { width: 1000px; margin: 30px auto; }
+        .filter { margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: 4px; }
+        .filter select, .filter button { padding: 6px 12px; margin-right: 10px; }
+        .question-item { padding: 20px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px; }
+        .question-type { display: inline-block; padding: 3px 8px; background: #007bff; color: white; border-radius: 3px; font-size: 0.8em; margin-right: 10px; }
+        .score-form { margin-top: 10px; }
+        .score-form select { width: 80px; padding: 5px; }
+        .score-form button { padding: 5px 10px; background: #17a2b8; color: white; border: none; border-radius: 3px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>LLM智能复习题系统</h1>
+        <nav>
+            <a href="{{ url_for('index') }}">首页</a>
+            <a href="{{ url_for('upload_material') }}">上传资料生成题目</a>
+            <a href="{{ url_for('question_list') }}">题库</a>
+            <a href="{{ url_for('create_paper') }}">生成卷子</a>
+            <a href="{{ url_for('wrong_list') }}">错题本</a>
+            <span>欢迎，{{ current_user.username }}</span>
+            <a href="{{ url_for('logout') }}">退出登录</a>
+        </nav>
+    </header>
+
+    <div class="container">
+        <h2>我的题库</h2>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, msg in messages %}
+                    <div class="flash {{ category }}">{{ msg }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- 筛选器 -->
+        <div class="filter">
+            <form method="get">
+                <label>题目类型：</label>
+                <select name="type" onchange="this.form.submit()">
+                    <option value="">全部类型</option>
+                    <option value="single_choice" {% if request.args.get('type') == 'single_choice' %}selected{% endif %}>单选题</option>
+                    <option value="multiple_choice" {% if request.args.get('type') == 'multiple_choice' %}selected{% endif %}>多选题</option>
+                    <option value="fill_blank" {% if request.args.get('type') == 'fill_blank' %}selected{% endif %}>填空题</option>
+                </select>
+                
+                <label>排序方式：</label>
+                <select name="sort" onchange="this.form.submit()">
+                    <option value="score_desc" {% if request.args.get('sort') == 'score_desc' %}selected{% endif %}>评分从高到低</option>
+                    <option value="create_time_desc" {% if request.args.get('sort') == 'create_time_desc' %}selected{% endif %}>最新创建</option>
+                </select>
+            </form>
+        </div>
+
+        <!-- 题目列表 -->
+        {% if questions %}
+            {% for q in questions %}
+                <div class="question-item">
+                    <div>
+                        {% if q.question_type == 'single_choice' %}
+                            <span class="question-type">单选题</span>
+                        {% elif q.question_type == 'multiple_choice' %}
+                            <span class="question-type">多选题</span>
+                        {% else %}
+                            <span class="question-type">填空题</span>
+                        {% endif %}
+                        <strong>题干：</strong>{{ q.content }}
+                    </div>
+                    
+                    {% if q.options %}
+                        <div style="margin: 10px 0 0 30px;">
+                            <strong>选项：</strong><br>
+                            {{ q.options|safe }}  <!-- 假设options存储的是带HTML的选项列表 -->
+                        </div>
+                    {% endif %}
+                    
+                    <div style="margin-top: 10px;">
+                        <strong>正确答案：</strong>{{ q.correct_answer }}
+                    </div>
+                    
+                    <div style="margin-top: 10px; color: #666;">
+                        <strong>来源：</strong>{{ q.source_material }}
+                    </div>
+                    
+                    <!-- 评分功能 -->
+                    <form class="score-form" method="post" action="{{ url_for('score_question', question_id=q.id) }}">
+                        <label>评分：</label>
+                        <select name="score">
+                            <option value="1">1分（较差）</option>
+                            <option value="2">2分</option>
+                            <option value="3" selected>3分（一般）</option>
+                            <option value="4">4分</option>
+                            <option value="5">5分（优秀）</option>
+                        </select>
+                        <button type="submit">提交评分</button>
+                    </form>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div style="text-align: center; padding: 50px; color: #666;">
+                暂无题目，<a href="{{ url_for('upload_material') }}">上传资料生成题目</a>
+            </div>
+        {% endif %}
+    </div>
+</body>
+</html>

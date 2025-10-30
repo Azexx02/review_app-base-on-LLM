@@ -1,0 +1,14 @@
+# 依赖和缓存
+venv/
+__pycache__/
+*.pyc
+*.pyo
+
+# 敏感配置
+docker-compose.yml
+.env
+config.py.bak  # 若有配置备份文件
+
+# 临时文件
+/tmp/
+uploaded_files/  # 若有用户上传文件目录

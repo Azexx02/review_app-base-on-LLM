@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>上传资料资料生成题目 - LLM复习题题系统</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .container { width: 800px; margin: 30px auto; }
+        .form-group { margin: 20px 0; }
+        label { display: block; margin-bottom: 8px; font-weight: bold; }
+        textarea { width: 100%; height: 200px; padding: 10px; border: 1px solid #ddd; border-radius: 4px; }
+        input[type="file"] { padding: 8px 0; }
+        .btn { padding: 10px 20px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        .btn:hover { background: #218838; }
+        .flash { padding: 10px; margin: 15px 0; border-radius: 4px; }
+        .flash.error { background: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>LLM智能复习题系统</h1>
+        <nav>
+            <a href="{{ url_for('index') }}">首页</a>
+            <a href="{{ url_for('upload_material') }}">上传资料生成题目</a>
+            <a href="{{ url_for('question_list') }}">题库</a>
+            <a href="{{ url_for('create_paper') }}">生成卷子</a>
+            <a href="{{ url_for('wrong_list') }}">错题本</a>
+            <span>欢迎，{{ current_user.username }}</span>
+            <a href="{{ url_for('logout') }}">退出登录</a>
+        </nav>
+    </header>
+
+    <div class="container">
+        <h2>上传资料生成复习题</h2>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, msg in messages %}
+                    <div class="flash {{ category }}">{{ msg }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form method="post" enctype="multipart/form-data">
+            <div class="form-group">
+                <label>输入文本资料（支持直接粘贴）</label>
+                <textarea name="material_text" placeholder="请粘贴学习资料内容（至少100字）..."></textarea>
+            </div>
+            <div class="form-group">
+                <label>或上传文件（支持txt、md格式）</label>
+                <input type="file" name="material_file" accept=".txt,.md">
+            </div>
+            <div class="form-group">
+                <button type="submit" class="btn">生成题目</button>
+            </div>
+        </form>
+        <p style="margin-top: 15px; color: #666;">提示：资料内容越详细，生成的题目质量越高（建议至少200字）</p>
+    </div>
+</body>
+</html>

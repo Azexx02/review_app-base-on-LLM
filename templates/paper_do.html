@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>做卷子 - {{ paper.paper_name }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <header>
+        <h1>做卷子：{{ paper.paper_name }}</h1>
+        <!-- 导航栏 -->
+    </header>
+    <main>
+        <form method="POST" action="{{ url_for('submit_paper', paper_id=paper.id) }}" class="paper-form">
+            {% for q in questions %}
+                <div class="question">
+                    <h3>{{ loop.index }}. 【{{ q.question_type.replace('_', ' ') }}】{{ q.content }}</h3>
+                    {% if q.question_type == 'single_choice' %}
+                        {% for opt in q.get_options() %}
+                            <label>
+                                <input type="radio" name="answer_{{ q.id }}" value="{{ opt[0] }}" required>
+                                {{ opt }}
+                            </label>
+                        {% endfor %}
+                    {% elif q.question_type == 'multiple_choice' %}
+                        {% for opt in q.get_options() %}
+                            <label>
+                                <input type="checkbox" name="answer_{{ q.id }}" value="{{ opt[0] }}">
+                                {{ opt }}
+                            </label>
+                        {% endfor %}
+                        <input type="hidden" name="answer_{{ q.id }}" value="" required> <!-- 确保至少选一个 -->
+                    {% elif q.question_type == 'fill_blank' %}
+                        <input type="text" name="answer_{{ q.id }}" placeholder="请输入答案" required>
+                    {% endif %}
+                </div>
+            {% endfor %}
+            <button type="submit" class="btn">提交答案</button>
+        </form>
+    </main>
+</body>
+</html>
