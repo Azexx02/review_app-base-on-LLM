@@ -24,3 +24,7 @@ services:
     volumes:
       - ./static:/app/static  # 挂载静态文件目录
       - ./tmp:/tmp  # 挂载临时目录（存放PDF）
+
+使用说明
+将上述配置复制到项目根目录的docker-compose.yml文件中
+执行docker-compose up -d启动服务
