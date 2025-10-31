@@ -119,7 +119,7 @@ def upload_material():
             new_question = Question(
                 question_type=q['type'],
                 content=q['content'],
-                options=json.dumps(q['options']) if 'options' in q else None,
+                options=json.dumps(q['options'],ensure_ascii=False) if 'options' in q else None,
                 correct_answer=q['correct_answer'],
                 source_material=material[:500] + "..." if len(material) > 500 else material,  # 截取前500字
                 creator_id=current_user.id
